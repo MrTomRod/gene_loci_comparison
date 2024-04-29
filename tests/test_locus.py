@@ -9,6 +9,8 @@ matplotlib.rcParams['font.family'] = "PT Sans Narrow"
 
 save_plots = False
 
+if not os.path.isfile('tests/test_loci.py'):
+    os.chdir('..')
 assert os.path.isfile('tests/test_loci.py'), f'Please set working directory to git root!'
 
 pgap_file = 'tests/data/PGAP/FAM3257.gbk'

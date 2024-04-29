@@ -37,12 +37,13 @@ class Locus:
         def add_unique(f: SeqFeature) -> bool:
             if 'locus_tag' not in f.qualifiers:
                 return False
-            feature = (f.location.nofuzzy_start, f.location.nofuzzy_end, f.qualifiers['locus_tag'][0])
-            if feature in unique_features:
-                return False
-            else:
-                unique_features.add(feature)
-                return True
+            return_bool = False
+            for loc in f.location.parts:
+                feature = (loc.start, loc.end, f.qualifiers['locus_tag'][0])
+                if feature not in unique_features:
+                    unique_features.add(feature)
+                    return_bool = True
+            return return_bool
 
         self.graphic_record: GraphicRecord = CustomBiopythonTranslator(
             label_fields=description_order,
@@ -108,8 +109,8 @@ class Locus:
 
         # add title
         if add_title and self.title is not None:
-            # ax.set_title(graphic_record.title)
-            plt.text(s=self.title, transform=ax.transAxes, **title_kwargs)
+            # ax.set_title(self.title)
+            ax.text(s=self.title, transform=ax.transAxes, **title_kwargs)
 
         return ax, _
 

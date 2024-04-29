@@ -1,3 +1,4 @@
+from copy import copy
 from Bio.SeqFeature import SeqFeature
 from dna_features_viewer import GraphicFeature, BiopythonTranslator
 
@@ -9,30 +10,22 @@ class CustomBiopythonTranslator(BiopythonTranslator):
         self.label_fields = label_fields
         super().__init__(*args, **kwargs)
 
-    def translate_feature(self, feature: SeqFeature):
-        """Translate a Biopython feature into a Dna Features Viewer feature."""
-        properties = dict(
-            label=self.compute_feature_label(feature),
-            color=self.compute_feature_color(feature),
-            html=self.compute_feature_html(feature),
-            fontdict=self.compute_feature_fontdict(feature),
-            box_linewidth=self.compute_feature_box_linewidth(feature),
-            box_color=self.compute_feature_box_color(feature),
-            linewidth=self.compute_feature_linewidth(feature),
-            label_link_color=self.compute_feature_label_link_color(feature),
-            legend_text=self.compute_feature_legend_text(feature),
-        )
-        if self.features_properties is not None:
-            other_properties = self.features_properties
-            if hasattr(other_properties, "__call__"):
-                other_properties = other_properties(feature)
-            properties.update(other_properties)
+    def compute_filtered_features(self, features):
+        """Return the list of features minus the ignored ones.
 
-        location = feature.location if feature.location_operator != 'join' else feature.location.parts[0]
-
-        return GraphicFeature(
-            start=location.start,
-            end=location.end,
-            strand=location.strand,
-            **properties
-        )
+        If a feature has multiple locations, it will be split into multiple
+        features with a location.
+        """
+        filtered_features = []
+        for f in features:
+            if all([fl(f) for fl in self.features_filters]) and f.type not in self.ignored_features_types:
+                if len(f.location.parts) == 1:
+                    # simple case: only one location
+                    filtered_features.append(f)
+                else:
+                    # multiple locations -> create multiple features
+                    for loc in f.location.parts:
+                        f_copy = copy(f)
+                        f_copy.location = loc
+                        filtered_features.append(f_copy)
+        return filtered_features

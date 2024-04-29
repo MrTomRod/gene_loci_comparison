@@ -9,12 +9,13 @@ def get_locus_tag(feature: GraphicFeature) -> str:
 
 
 def get_scaffold_and_geneposition(gbk_file, locus) -> (SeqRecord, int):
+    """If a feature has multiple parts, take the location of the first part."""
     assert os.path.isfile(gbk_file)
     with open(gbk_file, "r") as input_handle:
         for scf in SeqIO.parse(input_handle, "genbank"):
             for f in scf.features:
                 if f.type in ["gene", "CDS"] and "locus_tag" in f.qualifiers and f.qualifiers['locus_tag'][0] == locus:
-                    location = f.location if f.location_operator != 'join' else f.location.parts[0]
+                    location = f.location.parts[0]
                     f_start, f_end = location.start, location.end
                     gene_location = f_start + (f_end - f_start) // 2
                     return (scf, gene_location)
