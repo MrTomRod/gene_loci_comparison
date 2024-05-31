@@ -79,8 +79,7 @@ class Loci:
         fig = plt.figure(figsize=(fig_width, n_loci * fig_single_height))
 
         lr_padding = 0.07
-        tb_padding = 0
-        plt.subplots_adjust(left=lr_padding, bottom=tb_padding, right=1 - lr_padding, top=1 - tb_padding,
+        plt.subplots_adjust(left=lr_padding, bottom=0.05, right=1 - lr_padding, top=1,
                             wspace=None, hspace=None)
 
         for i, locus in enumerate(self.loci):
